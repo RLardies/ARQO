@@ -43,9 +43,8 @@ architecture rtl of control_unit is
    begin
 
       process(OpCode)
-
+      begin
       case OpCode is
-
          when OP_RTYPE =>
             RegDst <= '1';
             Branch <= '0';
@@ -95,8 +94,15 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
-
-
+         when others =>
+            RegDst <= '0';
+            Branch <= '0';
+            MemRead <= '0';
+            MemToReg <= '0';
+            ALUOp <= "011";
+            MemWrite <= '0';
+            RegWrite <= '1';
+            ALUSrc <= '1';
       end case;
 
    end process;

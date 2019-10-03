@@ -29,8 +29,6 @@ architecture rtl of processor is
 
 --General signals
 signal immEx : std_logic_vector(31 downto 0);
-immEx(15 downto 0) <= IDataIn(15 downto 0);
-imEx(31 downto 16) <= (others => IDataIn(15));
 
 -- Control Unit Signals
 signal Branch : std_logic;
@@ -111,8 +109,11 @@ end component;
 
 begin
 
+   immEx(15 downto 0) <= IDataIn(15 downto 0);
+   immEx(31 downto 16) <= (others => IDataIn(15));
+
    CU : control_unit port map (
-      OpCode => IDataIn,
+      OpCode => IDataIn(31 downto 26),
       Branch => Branch,
       MemToReg => MemToReg,
       MemWrite => MemWrite,
@@ -141,6 +142,7 @@ begin
       ALUControl => ALUControl
       );
 
+<<<<<<< HEAD
    ALU : alu port map (
       OpB => OpB,
       OpA => OpA,
@@ -149,23 +151,26 @@ begin
       ZFlag => ZFlag
       );
 
-   case RegDst is
-      when '0' => A3s <= IDataIn(20 downto 16)
-      when '1' => A3s <= IDataIn(15 downto 11)
-   end case;
-
-   case MemToReg is
-      when '0' => Wd3s <= Result
-      when '1' => Wd3s <= DDataOut
-   end case;
-
-   case ALUSrc is
-      when '0' => OpB <= Rd2s
-      when '1' => OpB <= immEx
-   end case;
-
    process(Clk)
-   begin
+      begin
+      case RegDst is
+         when '0' => A3s <= IDataIn(20 downto 16);
+         when '1' => A3s <= IDataIn(15 downto 11);
+         when others => A3s <= (others => '0');
+      end case;
+
+      case MemToReg is
+         when '0' => Wd3s <= Result;
+         when '1' => Wd3s <= DDataIn;
+         when others => A3s <= (others => '0');
+      end case;
+
+      case ALUSrc is
+         when '0' => OpB <= Rd2s;
+         when '1' => OpB <= immEx;
+         when others => A3s <= (others => '0');
+      end case;
+
       DDataOut <= DDataOut + 4;
 
       if (Branch = 1 && ZFlag = 1) then

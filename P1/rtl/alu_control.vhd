@@ -21,20 +21,25 @@ end alu_control;
 
 architecture rtl of alu_control is
 
+   -- Tipo para los codigos de control de la ALU:
+   subtype t_aluControl is std_logic_vector (3 downto 0);
+   subtype t_functControl is std_logic_vector (5 downto 0);
+
    constant ALU_OR   : t_aluControl := "0111";   
    constant ALU_NOT  : t_aluControl := "0101";
    constant ALU_AND  : t_aluControl := "0100";
+   constant ALU_XOR  : t_aluControl := "0110";
    constant ALU_SUB  : t_aluControl := "0001";
    constant ALU_ADD  : t_aluControl := "0000";
    constant ALU_SLT  : t_aluControl := "1010";
    constant ALU_S16  : t_aluControl := "1101";
 
-   constant FUNCT_OR   : t_aluControl := "100101";
-   constant FUNCT_XOR  : t_aluControl := "100110";
-   constant FUNCT_AND  : t_aluControl := "100100";
-   constant FUNCT_SUB  : t_aluControl := "100010";
-   constant FUNCT_ADD  : t_aluControl := "100000";
-   constant FUNCT_NOP  : t_aluControl := "000000";
+   constant FUNCT_OR   : t_functControl := "100101";
+   constant FUNCT_XOR  : t_functControl := "100110";
+   constant FUNCT_AND  : t_functControl := "100100";
+   constant FUNCT_SUB  : t_functControl := "100010";
+   constant FUNCT_ADD  : t_functControl := "100000";
+   constant FUNCT_NOP  : t_functControl := "000000";
 
 begin
 	
@@ -42,30 +47,30 @@ begin
 
    begin
 
-      if ALUOp == "000" then
+      if ALUOp = "000" then
          case Funct is
             when FUNCT_OR => ALUControl <= ALU_OR;
             when FUNCT_XOR => ALUControl <= ALU_XOR;
             when FUNCT_AND => ALUControl <= ALU_AND;
             when FUNCT_SUB => ALUControl <= ALU_SUB;
             when FUNCT_ADD | FUNCT_NOP => ALUControl <= ALU_ADD;
-	    when others => (others <= '0');
+	    when others => ALUControl <= (others => '0');
 	 end case;
 
-      elsif ALUOp == "001" then
+      elsif ALUOp = "001" then
          ALUControl <= ALU_NOT;
       
-      elsif ALUOp == "010" then
+      elsif ALUOp = "010" then
          ALUControl <= ALU_SLT;
 
-      elsif ALUOp == "011" then
+      elsif ALUOp = "011" then
          ALUControl <= ALU_S16;
 
-      elsif ALUOp == "100" then
+      elsif ALUOp = "100" then
          ALUControl <= ALU_SUB;
 
-      elsif ALUOp == "101" then
-         ALUControl <= ALU_ADD
+      elsif ALUOp = "101" then
+         ALUControl <= ALU_ADD;
        
       end if;  
 
