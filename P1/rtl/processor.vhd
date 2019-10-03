@@ -48,7 +48,8 @@ signal Wd3s : std_logic_vector(31 downto 0);
 signal Result : std_logic_vector (31 downto 0);
 signal OpA : std_logic_vector (31 downto 0);
 signal OpB : std_logic_vector (31 downto 0);
-signal ALUControl : std_logic_vector (3 downto 0)
+signal ALUControl : std_logic_vector (3 downto 0);
+signal Zflag : std_logic;
 
 --Reg-bank signals
 signal Rd2s : std_logic_vector(31 downto 0);
@@ -98,6 +99,16 @@ component alu_control is
    );
 end component;
 
+component alu is
+   port (
+      OpA     : in  std_logic_vector (31 downto 0); -- Operando A
+      OpB     : in  std_logic_vector (31 downto 0); -- Operando B
+      Control : in  std_logic_vector ( 3 downto 0); -- Codigo de control=op. a ejecutar
+      Result  : out std_logic_vector (31 downto 0); -- Resultado
+      ZFlag   : out std_logic                       -- Flag Z
+   );
+end component;
+
 begin
 
    CU : control_unit port map (
@@ -130,6 +141,14 @@ begin
       ALUControl => ALUControl
       );
 
+   ALU : alu port map (
+      OpB => OpB,
+      OpA => OpA,
+      Control => ALUControl,
+      Result => Result,
+      ZFlag => ZFlag
+      );
+
    case RegDst is
       when '0' => A3s <= IDataIn(20 downto 16)
       when '1' => A3s <= IDataIn(15 downto 11)
@@ -144,5 +163,15 @@ begin
       when '0' => OpB <= Rd2s
       when '1' => OpB <= immEx
    end case;
+
+   process(Clk)
+   begin
+      DDataOut <= DDataOut + 4;
+
+      if (Branch = 1 && ZFlag = 1) then
+         DDataOut <= DDataOut + (immEx << 2);
+      
+      end if;
+   end process;
  
 end architecture;
