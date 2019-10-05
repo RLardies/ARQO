@@ -63,7 +63,7 @@ architecture rtl of control_unit is
             ALUOp <= "100";
             MemWrite <= '0';
             RegWrite <= '0';
-            ALUSrc <= '1';
+            ALUSrc <= '0';
 
          when OP_SW =>
             RegDst <= '0';
