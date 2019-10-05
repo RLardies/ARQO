@@ -144,7 +144,6 @@ begin
       ALUControl => ALUControl
       );
 
-
    AL : alu port map (
       OpB => OpB,
       OpA => OpA,
