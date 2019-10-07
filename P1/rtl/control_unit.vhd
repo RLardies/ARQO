@@ -39,6 +39,8 @@ architecture rtl of control_unit is
    constant OP_SW     : t_opCode := "101011";
    constant OP_LW     : t_opCode := "100011";
    constant OP_LUI    : t_opCode := "001111";
+   constant OP_SLTI   : t_opCode := "001010";
+   constant OP_ADDI   : t_opCode := "001000";
 
    begin
 
@@ -94,6 +96,27 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+
+         when OP_SLTI =>
+            RegDst <= '0';
+            Branch <= '0';
+            MemRead <= '0';
+            MemToReg <= '0';
+            ALUOp <= "010";
+            MemWrite <= '0';
+            RegWrite <= '1';
+            ALUSrc <= '1';
+
+         when OP_ADDI =>
+            RegDst <= '0';
+            Branch <= '0';
+            MemRead <= '0';
+            MemToReg <= '0';
+            ALUOp <= "101";
+            MemWrite <= '0';
+            RegWrite <= '1';
+            ALUSrc <= '1';
+
          when others =>
             RegDst <= '0';
             Branch <= '0';

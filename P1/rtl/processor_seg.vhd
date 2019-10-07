@@ -1,4 +1,4 @@
- --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Procesador MIPS con pipeline curso Arquitectura 2019-2020
 --
 -- (INCLUIR AQUI LA INFORMACION SOBRE LOS AUTORES)
@@ -9,7 +9,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-entity processor is
+entity processor_seg is
    port(
       Clk         : in  std_logic; -- Reloj activo en flanco subida
       Reset       : in  std_logic; -- Reset asincrono activo nivel alto
@@ -23,9 +23,9 @@ entity processor is
       DDataOut   : out std_logic_vector(31 downto 0); -- Dato escrito
       DDataIn    : in  std_logic_vector(31 downto 0)  -- Dato leido
    );
-end processor;
+end processor_seg;
 
-architecture rtl of processor is 
+architecture rtl of processor_seg is 
 
 --General signals
 signal immEx : std_logic_vector(31 downto 0);
@@ -77,7 +77,7 @@ signal PcOut_EX : std_logic_vector(31 downto 0);
 signal PcIn_EX : std_logic_vector(31 downto 0);
 signal Rd1_EX : std_logic_vector(31 downto 0);
 signal Rd2_EX : std_logic_vector(31 downto 0);
-signal A3_EX : std_logic_vector(31 downto 0);
+signal A3_EX : std_logic_vector(4 downto 0);
 signal IDataIn_EX : std_logic_vector(31 downto 0);
 signal Branch_EX : std_logic;
 signal MemToReg_EX : std_logic;
@@ -93,7 +93,7 @@ signal ZFlag_EX : std_logic;
 -- MEM signals
 signal PcIn_MEM : std_logic_vector(31 downto 0);
 signal Rd2_MEM : std_logic_vector(31 downto 0);
-signal A3_MEM : std_logic_vector(31 downto 0);
+signal A3_MEM : std_logic_vector(4 downto 0);
 signal Branch_MEM : std_logic;
 signal MemToReg_MEM : std_logic;
 signal MemWrite_MEM : std_logic;
@@ -101,14 +101,14 @@ signal MemRead_MEM : std_logic;
 signal RegWrite_MEM : std_logic;
 signal Result_MEM : std_logic_vector(31 downto 0);
 signal ZFlag_MEM : std_logic;
-signal MDataIn_MEM : std_logic_vector(31 downto 0);
+signal DDataIn_MEM : std_logic_vector(31 downto 0);
 
 -- WD signals
-signal A3_WD : std_logic_vector(31 downto 0);
-signal MemToReg_WD : std_logic;
-signal RegWrite_WD : std_logic;
-signal Result_WD : std_logic_vector(31 downto 0);
-signal MDataIn_WD : std_logic_vector(31 downto 0);
+signal A3_WB : std_logic_vector(4 downto 0);
+signal MemToReg_WB : std_logic;
+signal RegWrite_WB : std_logic;
+signal Result_WB : std_logic_vector(31 downto 0);
+signal DDataIn_WB : std_logic_vector(31 downto 0);
 
 
 component control_unit is
@@ -134,14 +134,14 @@ component reg_bank is
 
    port (
       Clk   : in std_logic; -- Reloj activo en flanco de subida
-      Reset : in std_logic; -- Reset as韓crono a nivel alto
-      A1    : in std_logic_vector(4 downto 0);   -- Direcci髇 para el puerto Rd1
+      Reset : in std_logic; -- Reset as铆ncrono a nivel alto
+      A1    : in std_logic_vector(4 downto 0);   -- Direcci贸n para el puerto Rd1
       Rd1   : out std_logic_vector(31 downto 0); -- Dato del puerto Rd1
-      A2    : in std_logic_vector(4 downto 0);   -- Direcci髇 para el puerto Rd2
+      A2    : in std_logic_vector(4 downto 0);   -- Direcci贸n para el puerto Rd2
       Rd2   : out std_logic_vector(31 downto 0); -- Dato del puerto Rd2
-      A3    : in std_logic_vector(4 downto 0);   -- Direcci髇 para el puerto Wd3
+      A3    : in std_logic_vector(4 downto 0);   -- Direcci贸n para el puerto Wd3
       Wd3   : in std_logic_vector(31 downto 0);  -- Dato de entrada Wd3
-      We3   : in std_logic -- Habilitaci髇 de la escritura de Wd3
+      We3   : in std_logic -- Habilitaci贸n de la escritura de Wd3
    ); 
 
 end component;
@@ -172,49 +172,116 @@ begin
    immEx(31 downto 16) <= (others => IDataIn_EX(15));
 
    CU : control_unit port map (
-      OpCode => IDataIn(31 downto 26),
-      Branch => Branch,
-      MemToReg => MemToReg,
-      MemWrite => MemWrite,
-      MemRead => MemRead,
-      ALUSrc => ALUSrc,
-      ALUOp => ALUOp,
-      RegWrite => RegWrite,
-      RegDst => RegDst
+      OpCode => IDataIn_ID(31 downto 26),
+      Branch => Branch_ID,
+      MemToReg => MemToReg_ID,
+      MemWrite => MemWrite_ID,
+      MemRead => MemRead_ID,
+      ALUSrc => ALUSrc_ID,
+      ALUOp => ALUOp_ID,
+      RegWrite => RegWrite_ID,
+      RegDst => RegDst_ID
       );
 
    RB : reg_bank port map (
       Clk => Clk,
       Reset => Reset,
-      A1 => IDataIn(25 downto 21),
-      A2 => IDataIn(20 downto 16),
-      A3 => A3s,
+      A1 => IDataIn_ID(25 downto 21),
+      A2 => IDataIn_ID(20 downto 16),
+      A3 => A3_WB,
       Wd3 => Wd3s,
-      We3 => RegWrite,
-      Rd1 => OpA,
-      Rd2 => Rd2s
+      We3 => RegWrite_WB,
+      Rd1 => Rd1_ID,
+      Rd2 => Rd2_ID
       );
 
    ALU_C : alu_control port map (
-      Funct => IDataIn(5 downto 0),
-      ALUOp => ALUOp,
+      Funct => IDataIn_EX(5 downto 0),
+      ALUOp => ALUOp_EX,
       ALUControl => ALUControl
       );
 
    AL : alu port map (
       OpB => OpB,
-      OpA => OpA,
+      OpA => Rd1_EX,
       Control => ALUControl,
-      Result => Result,
-      ZFlag => ZFlag
+      Result => Result_EX,
+      ZFlag => ZFlag_EX
       );
 
 process(Clk, Reset)
    begin
       if (Reset = '1') then
          PcOut_IF <= (others => '0');
-      elsif rising_edge(Clk) then 
-      	 PcOut_IF <= PcIn;		     
+         -- Falta resetear los registros
+         IDataIn_ID <= (others => '0');
+         PcOut_ID <= (others => '0');
+
+         Rd1_EX <= (others => '0');
+         Rd2_EX <= (others => '0');
+         IDataIn_EX <= (others => '0');
+         PcOut_EX <= (others => '0');
+         Branch_EX <= '0';
+         ALUSrc_EX <= '0';
+         MemWrite_EX <= '0';
+         MemRead_EX <= '0';
+         MemToReg_EX <= '0';
+         RegWrite_EX <= '0';
+
+         MemToReg_MEM <= '0';
+         PcIn_MEM <= (others => '0');
+         ZFlag_MEM <= '0';
+         Rd2_MEM <= (others => '0');
+         MemRead_MEM <= '0';
+         MemWrite_MEM <= '0';
+         Branch_MEM <= '0';
+         RegWrite_MEM <= '0';
+         Result_MEM <= (others => '0');
+         A3_MEM <= (others => '0');
+
+         MemToReg_WB <= '0';
+         RegWrite_WB <= '0';
+         Result_WB <= (others => '0');
+         A3_WB <= (others => '0');
+         DDataIn_WB <= (others => '0');
+
+      elsif rising_edge(Clk) then
+        -- MEM -> WB
+         MemToReg_WB <= MemToReg_MEM;
+         RegWrite_WB <= RegWrite_MEM;
+         Result_WB <= Result_MEM;
+         A3_WB <= A3_MEM;
+         DDataIn_WB <= DDataIn_MEM;
+         -- EX -> MEM
+         PcIn_MEM <= PcIn_EX;
+         Rd2_MEM <= Rd2_EX;
+         Branch_MEM <= Branch_EX;
+         MemWrite_MEM <= MemWrite_EX;
+         MemRead_MEM <= MemRead_EX;
+         MemToReg_MEM <= MemToReg_EX;
+         RegWrite_MEM <= RegWrite_EX;
+         ZFlag_MEM <= ZFlag_EX;
+         Result_MEM <= Result_EX;
+         A3_MEM <= A3_EX;
+         -- ID -> EX
+         PcOut_EX <= PcOut_ID;
+         Rd1_EX <= Rd1_ID;
+         Rd2_EX <= Rd2_ID;
+         IDataIn_EX <= IDataIn_ID;
+         ALUSrc_EX <= ALUSrc_ID;
+         ALUOp_EX <= ALUOp_ID;
+         RegDst_EX <= RegDst_ID;
+         Branch_EX <= Branch_ID;
+         MemWrite_EX <= MemWrite_ID;
+         MemRead_EX <= MemRead_ID;
+         MemToReg_EX <= MemToReg_ID;
+         RegWrite_EX <= RegWrite_ID;
+         -- IF -> ID
+         PcOut_ID <= PcOut_IF;
+         IDataIn_ID <= IDataIn_IF;
+
+         PcOut_IF <= PcIn; 
+
       end if;
 
 end process;
@@ -259,7 +326,7 @@ end process;
 process(Clk, ALUSrc_EX, Rd2_EX, immEx)
 begin
 
-      case ALUSrc is
+      case ALUSrc_EX is
          when '0' => OpB <= Rd2_EX;
          when '1' => OpB <= immEx;
          when others => OpB <= (others => '0');
@@ -270,7 +337,9 @@ end process;
    DWrEn <= MemWrite_MEM;
    DRdEn <= MemRead_MEM;
    DDataOut <= Rd2_MEM;
+   DDataIn_MEM <= DDataIn;
    DAddr <= Result_MEM;
    IAddr <= PcOut_IF;
+   IDataIn_IF <= IDataIn;
  
 end architecture;
