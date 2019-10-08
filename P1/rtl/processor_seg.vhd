@@ -34,6 +34,7 @@ signal PcOut : std_logic_vector(31 downto 0);
 
 -- Control Unit Signals
 signal Branch : std_logic;
+signal Jump : std_logic;
 signal MemToReg : std_logic;
 signal MemWrite : std_logic;
 signal MemRead  : std_logic;
@@ -64,6 +65,7 @@ signal IDataIn_ID : std_logic_vector(31 downto 0);
 signal Rd2_ID : std_logic_vector(31 downto 0);
 signal Rd1_ID : std_logic_vector(31 downto 0);
 signal Branch_ID : std_logic;
+signal Jump_ID : std_logic;
 signal MemToReg_ID : std_logic;
 signal MemWrite_ID : std_logic;
 signal MemRead_ID : std_logic;
@@ -117,6 +119,7 @@ component control_unit is
       OpCode  : in  std_logic_vector (5 downto 0);
       -- Seniales para el PC
       Branch : out  std_logic; -- 1 = Ejecutandose instruccion branch
+      Jump : out std_logic;
       -- Seniales relativas a la memoria
       MemToReg : out  std_logic; -- 1 = Escribir en registro la salida de la mem.
       MemWrite : out  std_logic; -- Escribir la memoria
@@ -174,6 +177,7 @@ begin
    CU : control_unit port map (
       OpCode => IDataIn_ID(31 downto 26),
       Branch => Branch_ID,
+      Jump => Jump_ID,
       MemToReg => MemToReg_ID,
       MemWrite => MemWrite_ID,
       MemRead => MemRead_ID,
@@ -291,7 +295,9 @@ begin
 
    if ((Branch_MEM = '1') and (ZFlag_MEM = '1')) then
       PcIn <= PcIn_MEM;
-   else 
+   elsif (Jump_ID = '1') then
+      PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
+   else
       PcIn <= PcOut_IF + 4;
    end if;
 

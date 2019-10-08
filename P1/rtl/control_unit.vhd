@@ -15,6 +15,7 @@ entity control_unit is
       OpCode  : in  std_logic_vector (5 downto 0);
       -- Seniales para el PC
       Branch : out  std_logic; -- 1 = Ejecutandose instruccion branch
+      Jump : out std_logic; --1 = Instruccion jump
       -- Seniales relativas a la memoria
       MemToReg : out  std_logic; -- 1 = Escribir en registro la salida de la mem.
       MemWrite : out  std_logic; -- Escribir la memoria
@@ -41,6 +42,7 @@ architecture rtl of control_unit is
    constant OP_LUI    : t_opCode := "001111";
    constant OP_SLTI   : t_opCode := "001010";
    constant OP_ADDI   : t_opCode := "001000";
+   constant OP_JUMP   : t_opCode := "000010";
 
    begin
 
@@ -56,6 +58,7 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '0';
+	         Jump <= '0';
 
          when OP_BEQ =>
             RegDst <= '0';
@@ -66,6 +69,7 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '0';
             ALUSrc <= '0';
+	         Jump <= '0';
 
          when OP_SW =>
             RegDst <= '0';
@@ -76,6 +80,7 @@ architecture rtl of control_unit is
             MemWrite <= '1';
             RegWrite <= '0';
             ALUSrc <= '1';
+	         Jump <= '0';
 
          when OP_LW =>
             RegDst <= '0';
@@ -86,6 +91,7 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+	         Jump <= '0';
 
          when OP_LUI =>
             RegDst <= '0';
@@ -96,16 +102,19 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+	         Jump <= '0';
 
          when OP_SLTI =>
             RegDst <= '0';
             Branch <= '0';
             MemRead <= '0';
+	         Jump <= '0';
             MemToReg <= '0';
             ALUOp <= "010";
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+	         Jump <= '0';
 
          when OP_ADDI =>
             RegDst <= '0';
@@ -116,6 +125,18 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+	         Jump <= '0';
+
+	      when OP_JUMP =>
+	         RegDst <= '0';
+            Branch <= '0';
+            MemRead <= '0';
+            MemToReg <= '0';
+            ALUOp <= "100";
+            MemWrite <= '0';
+            RegWrite <= '0';
+            ALUSrc <= '0';
+	         Jump <= '1';
 
          when others =>
             RegDst <= '0';
@@ -126,6 +147,7 @@ architecture rtl of control_unit is
             MemWrite <= '0';
             RegWrite <= '1';
             ALUSrc <= '1';
+	         Jump <= '0';
       end case;
 
    end process;
