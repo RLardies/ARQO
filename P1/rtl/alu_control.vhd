@@ -54,7 +54,7 @@ begin
             when FUNCT_XOR => ALUControl <= ALU_XOR;
             when FUNCT_AND => ALUControl <= ALU_AND;
             when FUNCT_SUB => ALUControl <= ALU_SUB;
-	    when FUNCT_SLT => ALUControl <= ALU_SLT;
+	         when FUNCT_SLT => ALUControl <= ALU_SLT;
             when FUNCT_ADD | FUNCT_NOP => ALUControl <= ALU_ADD;
 	    when others => ALUControl <= (others => '0');
 	 end case;
