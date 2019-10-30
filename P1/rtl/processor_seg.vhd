@@ -60,6 +60,12 @@ signal ForwardA : std_logic_vector(1 downto 0);
 signal ForwardB : std_logic_vector(1 downto 0);
 signal OpB_FW : std_logic_vector(31 downto 0);
 
+--Hazard_detection_unit
+
+signal PCWrite : std_logic;
+signal Nop_ID : std_logic;
+signal ID_Write : std_logic;
+
 -- IF signals
 signal PCOut_IF : std_logic_vector(31 downto 0);
 signal IDataIn_IF : std_logic_vector(31 downto 0);
@@ -96,7 +102,6 @@ signal RegWrite_EX : std_logic;
 signal RegDst_EX : std_logic;
 signal Result_EX : std_logic_vector(31 downto 0);
 signal ZFlag_EX : std_logic;
-signal Branch_AND : std_logic;
 
 -- MEM signals
 signal PcIn_MEM : std_logic_vector(31 downto 0);
@@ -189,14 +194,12 @@ end component;
 component hazard_detection_unit is
    port(
       MemRead_EX : in std_logic;
-      Branch_AND : in std_logic;
       Rt_EX : in std_logic_vector(31 downto 0);
       Rt_ID : in std_logic_vector(31 downto 0);
       Rs_ID : in std_logic_vector(31 downto 0);
       PCWrite : out std_logic;
       ID_Write : out std_logic;
-      Nop_ID : out std_logic;
-      Nop_IF : out std_logic
+      Nop_ID : out std_logic
       );
 end component;
 
@@ -245,14 +248,24 @@ begin
       );
 
    FW : forwarding_unit port map(
-      ForwardA 
-      ForwardB 
-      Rt_EX <= IDataIn_EX(20 downto 16),
-      Rs_EX <= IDataIn_EX(15 downto 11),
-      A3_MEM <= A3_MEM,
-      A3_WB <= A3_WB,
-      RegWrite_MEM <= RegWrite_MEM,
-      RegWrite_WB <= RegWrite_WB
+      ForwardA => ForwardA,
+      ForwardB => ForwardB,
+      Rt_EX => IDataIn_EX(20 downto 16),
+      Rs_EX => IDataIn_EX(15 downto 11),
+      A3_MEM => A3_MEM,
+      A3_WB => A3_WB,
+      RegWrite_MEM => RegWrite_MEM,
+      RegWrite_WB => RegWrite_WB
+      );
+
+   HD : hazard_detection_unit port map(
+      MemRead_EX => MemRead_EX,
+      Rt_EX => Rt_EX,
+      Rt_ID => Rt_ID,
+      Rs_ID => Rs_ID,
+      PCWrite => PCWrite,
+      ID_Write => ID_Write,
+      Nop_ID => Nop_ID
       );
 
 process(Clk, Reset)
@@ -306,21 +319,39 @@ process(Clk, Reset)
          Result_MEM <= Result_EX;
          A3_MEM <= A3_EX;
          -- ID -> EX
+
          PcOut_EX <= PcOut_ID;
          Rd1_EX <= Rd1_ID;
          Rd2_EX <= Rd2_ID;
-         IDataIn_EX <= IDataIn_ID;
-         ALUSrc_EX <= ALUSrc_ID;
-         ALUOp_EX <= ALUOp_ID;
-         RegDst_EX <= RegDst_ID;
-         Branch_EX <= Branch_ID;
-         MemWrite_EX <= MemWrite_ID;
-         MemRead_EX <= MemRead_ID;
-         MemToReg_EX <= MemToReg_ID;
-         RegWrite_EX <= RegWrite_ID;
+         DataIn_EX <= IDataIn_ID;
+
+         if Nop_ID = '0' then
+            ALUSrc_EX <= ALUSrc_ID;
+            ALUOp_EX <= ALUOp_ID;
+            RegDst_EX <= RegDst_ID;
+            Branch_EX <= Branch_ID;
+            MemWrite_EX <= MemWrite_ID;
+            MemRead_EX <= MemRead_ID;
+            MemToReg_EX <= MemToReg_ID;
+            RegWrite_EX <= RegWrite_ID;
+
+         else
+            ALUSrc_EX <= '0';
+            ALUOp_EX <= '0';
+            RegDst_EX <= '0';
+            Branch_EX <= '0';
+            MemWrite_EX <= '0';
+            MemRead_EX <= '0';
+            MemToReg_EX <= '0';
+            RegWrite_EX <= '0';
+         end if;
+
          -- IF -> ID
-         PcOut_ID <= PcOut_IF;
-         IDataIn_ID <= IDataIn_IF;
+
+         if ID_Write = '1' then
+            PcOut_ID <= PcOut_IF;
+            IDataIn_ID <= IDataIn_IF;
+         end if;
 
          PcOut_IF <= PcIn; 
 
@@ -331,14 +362,15 @@ end process;
 process(Clk, Branch_EX, ZFlag_EX)
 begin
 
-   Branch_AND <= Branch_EX AND ZFlag_EX;
+   if PCWrite = '1' then
 
-   if Branch_AND = '1' then
-      PcIn <= PcIn_EX;
-   elsif (Jump_ID = '1') then
-      PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
-   else
-      PcIn <= PcOut_IF + 4;
+      if Branch_EX AND ZFlag_EX then
+         PcIn <= PcIn_EX;
+      elsif (Jump_ID = '1') then
+         PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
+      else
+         PcIn <= PcOut_IF + 4;
+      end if;
    end if;
 
 end process;
@@ -397,7 +429,6 @@ process(Clk, ForwardB,Result_MEM,Result_WB,Rd2_EX)
          when others => OpB_FW <= Rd2_EX;
       end case;
    end process;
-
 
 
    DWrEn <= MemWrite_MEM;
