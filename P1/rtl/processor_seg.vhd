@@ -69,6 +69,7 @@ signal ID_Write : std_logic;
 -- IF signals
 signal PCOut_IF : std_logic_vector(31 downto 0);
 signal IDataIn_IF : std_logic_vector(31 downto 0);
+signal Nop_IF : std_logic;
 
 -- ID signals
 signal PCOut_ID : std_logic_vector(31 downto 0);
@@ -93,6 +94,7 @@ signal Rd2_EX : std_logic_vector(31 downto 0);
 signal A3_EX : std_logic_vector(4 downto 0);
 signal IDataIn_EX : std_logic_vector(31 downto 0);
 signal Branch_EX : std_logic;
+signal Branch_RES : std_logic;
 signal MemToReg_EX : std_logic;
 signal MemWrite_EX : std_logic;
 signal MemRead_EX : std_logic;
@@ -194,12 +196,14 @@ end component;
 component hazard_detection_unit is
    port (
       MemRead_EX : in std_logic;
+      Branch_RES : in std_logic;
       Rt_EX : in std_logic_vector(4 downto 0);
       Rt_ID : in std_logic_vector(4 downto 0);
       Rs_ID : in std_logic_vector(4 downto 0);
       PCWrite : out std_logic;
       ID_Write : out std_logic;
-      Nop_ID : out std_logic
+      Nop_ID : out std_logic;
+      Nop_IF : out std_logic
       );
 end component;
 
@@ -251,7 +255,7 @@ begin
       ForwardA => ForwardA,
       ForwardB => ForwardB,
       Rt_EX => IDataIn_EX(20 downto 16),
-      Rs_EX => IDataIn_EX(15 downto 11),
+      Rs_EX => IDataIn_EX(25 downto 21),
       A3_MEM => A3_MEM,
       A3_WB => A3_WB,
       RegWrite_MEM => RegWrite_MEM,
@@ -260,118 +264,127 @@ begin
 
    HD : hazard_detection_unit port map(
       MemRead_EX => MemRead_EX,
+      Branch_RES => Branch_RES,
       Rt_EX => IDataIn_EX(20 downto 16),
       Rt_ID => IDataIn_ID(20 downto 16),
       Rs_ID => IDataIn_ID(25 downto 21),
       PCWrite => PCWrite,
       ID_Write => ID_Write,
-      Nop_ID => Nop_ID
+      Nop_ID => Nop_ID,
+      Nop_IF => Nop_IF
       );
 
+
+-- PC count
 process(Clk, Reset)
-   begin
-      if (Reset = '1') then
-         PcOut_IF <= (others => '0');
-         -- Falta resetear los registros
-         IDataIn_ID <= (others => '0');
-         PcOut_ID <= (others => '0');
+begin
+   if Reset = '1' then
+      PcOut_IF <= (others => '0');
 
-         Rd1_EX <= (others => '0');
-         Rd2_EX <= (others => '0');
-         IDataIn_EX <= (others => '0');
-         PcOut_EX <= (others => '0');
-         Branch_EX <= '0';
-         ALUSrc_EX <= '0';
-         MemWrite_EX <= '0';
-         MemRead_EX <= '0';
-         MemToReg_EX <= '0';
-         RegWrite_EX <= '0';
-
-         MemToReg_MEM <= '0';
-         PcIn_MEM <= (others => '0');
-         Rd2_MEM <= (others => '0');
-         MemRead_MEM <= '0';
-         MemWrite_MEM <= '0';
-         RegWrite_MEM <= '0';
-         Result_MEM <= (others => '0');
-         A3_MEM <= (others => '0');
-
-         MemToReg_WB <= '0';
-         RegWrite_WB <= '0';
-         Result_WB <= (others => '0');
-         A3_WB <= (others => '0');
-         DDataIn_WB <= (others => '0');
-
-      elsif rising_edge(Clk) then
-        -- MEM -> WB
-         MemToReg_WB <= MemToReg_MEM;
-         RegWrite_WB <= RegWrite_MEM;
-         Result_WB <= Result_MEM;
-         A3_WB <= A3_MEM;
-         DDataIn_WB <= DDataIn_MEM;
-         -- EX -> MEM
-         PcIn_MEM <= PcIn_EX;
-         Rd2_MEM <= Rd2_EX;
-         MemWrite_MEM <= MemWrite_EX;
-         MemRead_MEM <= MemRead_EX;
-         MemToReg_MEM <= MemToReg_EX;
-         RegWrite_MEM <= RegWrite_EX;
-         Result_MEM <= Result_EX;
-         A3_MEM <= A3_EX;
-         -- ID -> EX
-
-         PcOut_EX <= PcOut_ID;
-         Rd1_EX <= Rd1_ID;
-         Rd2_EX <= Rd2_ID;
-         IDataIn_EX <= IDataIn_ID;
-
-         if Nop_ID = '0' then
-            ALUSrc_EX <= ALUSrc_ID;
-            ALUOp_EX <= ALUOp_ID;
-            RegDst_EX <= RegDst_ID;
-            Branch_EX <= Branch_ID;
-            MemWrite_EX <= MemWrite_ID;
-            MemRead_EX <= MemRead_ID;
-            MemToReg_EX <= MemToReg_ID;
-            RegWrite_EX <= RegWrite_ID;
-
-         else
-            ALUSrc_EX <= '0';
-            ALUOp_EX <= (others => '0');
-            RegDst_EX <= '0';
-            Branch_EX <= '0';
-            MemWrite_EX <= '0';
-            MemRead_EX <= '0';
-            MemToReg_EX <= '0';
-            RegWrite_EX <= '0';
-         end if;
-
-         -- IF -> ID
-
-         if ID_Write = '1' then
-            PcOut_ID <= PcOut_IF;
-            IDataIn_ID <= IDataIn_IF;
-         end if;
-
-         PcOut_IF <= PcIn; 
-
-      end if;
-
+   elsif rising_edge(Clk) and PCWrite = '1' then
+      PcOut_IF <= PcIn;
+   end if;
 end process;
 
-process(Clk, Branch_EX, ZFlag_EX)
+-- Cambio IF -> ID
+process(Clk, Reset, ID_Write)
+begin
+   if Reset = '1' or (rising_edge(Clk) and Nop_IF = '1') then
+      IDataIn_ID <= (others => '0');
+      PcOut_ID <= (others => '0');
+
+   elsif rising_edge(Clk) and ID_Write = '1' then
+      PcOut_ID <= PcOut_IF;
+      IDataIn_ID <= IDataIn_IF;
+   end if;
+end process;
+
+-- Cambio ID -> EX
+process(Clk, Reset, Nop_ID)
+begin
+   if Reset = '1' or (rising_edge(Clk) and Nop_ID = '1') then
+      Rd1_EX <= (others => '0');
+      Rd2_EX <= (others => '0');
+      IDataIn_EX <= (others => '0');
+      PcOut_EX <= (others => '0');
+      Branch_EX <= '0';
+      ALUSrc_EX <= '0';
+      MemWrite_EX <= '0';
+      MemRead_EX <= '0';
+      MemToReg_EX <= '0';
+      RegWrite_EX <= '0';
+
+   elsif rising_edge(Clk) then
+      ALUSrc_EX <= ALUSrc_ID;
+      ALUOp_EX <= ALUOp_ID;
+      RegDst_EX <= RegDst_ID;
+      Branch_EX <= Branch_ID;
+      MemWrite_EX <= MemWrite_ID;
+      MemToReg_EX <= MemToReg_ID;
+      RegWrite_EX <= RegWrite_ID;
+      PcOut_EX <= PcOut_ID;
+      Rd1_EX <= Rd1_ID;
+      Rd2_EX <= Rd2_ID;
+      IDataIn_EX <= IDataIn_ID;
+   end if;
+end process;
+
+-- Cambio EX -> MEM
+process(Clk, Reset)
+begin
+   if Reset = '1' then
+      MemToReg_MEM <= '0';
+      PcIn_MEM <= (others => '0');
+      Rd2_MEM <= (others => '0');
+      MemRead_MEM <= '0';
+      MemWrite_MEM <= '0';
+      RegWrite_MEM <= '0';
+      Result_MEM <= (others => '0');
+      A3_MEM <= (others => '0');
+
+   elsif rising_edge(Clk) then
+      PcIn_MEM <= PcIn_EX;
+      Rd2_MEM <= Rd2_EX;
+      MemWrite_MEM <= MemWrite_EX;
+      MemRead_MEM <= MemRead_EX;
+      MemToReg_MEM <= MemToReg_EX;
+      RegWrite_MEM <= RegWrite_EX;
+      Result_MEM <= Result_EX;
+      A3_MEM <= A3_EX;
+   end if;
+end process;
+
+-- Cambio MEM -> WB
+process(Clk, Reset)
+begin
+   if Reset = '1' then
+      MemToReg_WB <= '0';
+      RegWrite_WB <= '0';
+      Result_WB <= (others => '0');
+      A3_WB <= (others => '0');
+      DDataIn_WB <= (others => '0');
+
+   elsif rising_edge(Clk) then
+      MemToReg_WB <= MemToReg_MEM;
+      RegWrite_WB <= RegWrite_MEM;
+      Result_WB <= Result_MEM;
+      A3_WB <= A3_MEM;
+      DDataIn_WB <= DDataIn_MEM;
+   end if;
+end process;
+
+process(Clk, Branch_EX, ZFlag_EX, Jump_ID)
 begin
 
-   --if PCWrite = '1' then
+   Branch_RES <= Branch_EX and ZFlag_EX;
 
-      if (Branch_EX and ZFlag_EX) = '1' then
+   if Branch_RES = '1' then
          PcIn <= PcIn_EX;
-      elsif (Jump_ID = '1') then
-         PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
-      else
-         PcIn <= PcOut_IF + 4;
-      end if;
- --  end if;
+   elsif (Jump_ID = '1') then
+      PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
+   else
+      PcIn <= PcOut_IF + 4;
+   end if;
 
 end process;
 
@@ -416,7 +429,7 @@ process(Clk,ForwardA,Result_MEM,Result_WB,Rd1_EX)
    begin
       case ForwardA is
          when "10" => OpA <= Result_MEM;
-         when "01" => OpA <= Result_WB;
+         when "01" => OpA <= Wd3s;
          when others => OpA <= Rd1_EX;
       end case;
    end process;
@@ -425,7 +438,7 @@ process(Clk, ForwardB,Result_MEM,Result_WB,Rd2_EX)
    begin
       case ForwardB is
          when "10" => OpB_FW <= Result_MEM;
-         when "01" => OpB_FW <= Result_WB;
+         when "01" => OpB_FW <= Wd3s;
          when others => OpB_FW <= Rd2_EX;
       end case;
    end process;
