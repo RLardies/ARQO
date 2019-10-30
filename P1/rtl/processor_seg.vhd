@@ -179,24 +179,24 @@ component alu is
 end component;
 
 component forwarding_unit is
-   port(
+   port (
       ForwardA : out std_logic_vector(1 downto 0);
       ForwardB : out std_logic_vector(1 downto 0);
       Rt_EX : in std_logic_vector(4 downto 0);
       Rs_EX : in std_logic_vector(4 downto 0);
       A3_MEM : in std_logic_vector(4 downto 0);
-      A3_WB : in std_logic_vector(31 downto 0)
+      A3_WB : in std_logic_vector(4 downto 0);
       RegWrite_MEM : in std_logic;
       RegWrite_WB : in std_logic
       );
 end component;
 
 component hazard_detection_unit is
-   port(
+   port (
       MemRead_EX : in std_logic;
-      Rt_EX : in std_logic_vector(31 downto 0);
-      Rt_ID : in std_logic_vector(31 downto 0);
-      Rs_ID : in std_logic_vector(31 downto 0);
+      Rt_EX : in std_logic_vector(4 downto 0);
+      Rt_ID : in std_logic_vector(4 downto 0);
+      Rs_ID : in std_logic_vector(4 downto 0);
       PCWrite : out std_logic;
       ID_Write : out std_logic;
       Nop_ID : out std_logic
@@ -260,9 +260,9 @@ begin
 
    HD : hazard_detection_unit port map(
       MemRead_EX => MemRead_EX,
-      Rt_EX => Rt_EX,
-      Rt_ID => Rt_ID,
-      Rs_ID => Rs_ID,
+      Rt_EX => IDataIn_EX(20 downto 16),
+      Rt_ID => IDataIn_ID(20 downto 16),
+      Rs_ID => IDataIn_ID(25 downto 21),
       PCWrite => PCWrite,
       ID_Write => ID_Write,
       Nop_ID => Nop_ID
@@ -323,7 +323,7 @@ process(Clk, Reset)
          PcOut_EX <= PcOut_ID;
          Rd1_EX <= Rd1_ID;
          Rd2_EX <= Rd2_ID;
-         DataIn_EX <= IDataIn_ID;
+         IDataIn_EX <= IDataIn_ID;
 
          if Nop_ID = '0' then
             ALUSrc_EX <= ALUSrc_ID;
@@ -337,7 +337,7 @@ process(Clk, Reset)
 
          else
             ALUSrc_EX <= '0';
-            ALUOp_EX <= '0';
+            ALUOp_EX <= (others => '0');
             RegDst_EX <= '0';
             Branch_EX <= '0';
             MemWrite_EX <= '0';
@@ -362,16 +362,16 @@ end process;
 process(Clk, Branch_EX, ZFlag_EX)
 begin
 
-   if PCWrite = '1' then
+   --if PCWrite = '1' then
 
-      if Branch_EX AND ZFlag_EX then
+      if (Branch_EX and ZFlag_EX) = '1' then
          PcIn <= PcIn_EX;
       elsif (Jump_ID = '1') then
          PcIn <= PcOut_ID(31 downto 28) & (IDataIn_ID(25 downto 0) & "00");
       else
          PcIn <= PcOut_IF + 4;
       end if;
-   end if;
+ --  end if;
 
 end process;
 
@@ -415,8 +415,8 @@ end process;
 process(Clk,ForwardA,Result_MEM,Result_WB,Rd1_EX)
    begin
       case ForwardA is
-         when '10' => OpA <= Result_MEM;
-         when '01' => OpA <= Result_WB;
+         when "10" => OpA <= Result_MEM;
+         when "01" => OpA <= Result_WB;
          when others => OpA <= Rd1_EX;
       end case;
    end process;
@@ -424,8 +424,8 @@ process(Clk,ForwardA,Result_MEM,Result_WB,Rd1_EX)
 process(Clk, ForwardB,Result_MEM,Result_WB,Rd2_EX)
    begin
       case ForwardB is
-         when '10' => OpB_FW <= Result_MEM;
-         when '01' => OpB_FW <= Result_WB;
+         when "10" => OpB_FW <= Result_MEM;
+         when "01" => OpB_FW <= Result_WB;
          when others => OpB_FW <= Rd2_EX;
       end case;
    end process;

@@ -17,7 +17,7 @@ entity forwarding_unit is
       Rt_EX : in std_logic_vector(4 downto 0);
       Rs_EX : in std_logic_vector(4 downto 0);
       A3_MEM : in std_logic_vector(4 downto 0);
-      A3_WB : in std_logic_vector(31 downto 0)
+      A3_WB : in std_logic_vector(4 downto 0);
       RegWrite_MEM : in std_logic;
       RegWrite_WB : in std_logic
    ) ;
@@ -29,17 +29,17 @@ begin
 
    process(A3_MEM, RegWrite_MEM,Rs_EX,Rt_EX)
    begin
-      if RegWrite_MEM and (A3_MEM /= "00000") and (A3_MEM = Rs_EX) then
+      if RegWrite_MEM = '1' and (A3_MEM /= "00000") and (A3_MEM = Rs_EX) then
          ForwardA <= "10";
-      elsif RegWrite_WB and (A3_WB /= "00000") and (A3_WB = Rs_EX) then
+      elsif RegWrite_WB = '1' and (A3_WB /= "00000") and (A3_WB = Rs_EX) then
          ForwardA <= "01";
       else 
          ForwardA <= "00";
       end if;
 
-      if RegWrite_MEM and (A3_MEM /= "00000") and (A3_MEM = Rt_EX) then
+      if RegWrite_MEM = '1' and (A3_MEM /= "00000") and (A3_MEM = Rt_EX) then
          ForwardB <= "10";
-      elsif RegWrite_WB and (A3_WB /= "00000") and (A3_WB = Rt_EX) then
+      elsif RegWrite_WB = '1' and (A3_WB /= "00000") and (A3_WB = Rt_EX) then
          ForwardB <= "01"; 
       else
          ForwardB <= "00";

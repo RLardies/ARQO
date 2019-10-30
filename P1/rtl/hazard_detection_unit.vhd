@@ -6,9 +6,9 @@ use ieee.numeric_std.all;               -- for type conversions
 entity hazard_detection_unit is
 	port (
 		MemRead_EX : in std_logic;
-		Rt_EX : in std_logic_vector(31 downto 0);
-		Rt_ID : in std_logic_vector(31 downto 0);
-		Rs_ID : in std_logic_vector(31 downto 0);
+		Rt_EX : in std_logic_vector(4 downto 0);
+		Rt_ID : in std_logic_vector(4 downto 0);
+		Rs_ID : in std_logic_vector(4 downto 0);
 		PCWrite : out std_logic;
 		ID_Write : out std_logic;
 		Nop_ID : out std_logic
