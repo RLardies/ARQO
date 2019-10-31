@@ -52,7 +52,7 @@ architecture rtl of control_unit is
          when OP_RTYPE =>
             RegDst <= '1';
             Branch <= '0';
-            MemRead <= '1';
+            MemRead <= '0';
             MemToReg <= '0';
             ALUOp <= "000";
             MemWrite <= '0';

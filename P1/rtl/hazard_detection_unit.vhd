@@ -21,7 +21,7 @@ end hazard_detection_unit;
 architecture rtl of hazard_detection_unit is
 
 begin
-	process(MemRead_EX,Rt_EX,Rs_ID,Rt_ID)
+	process(MemRead_EX,Rt_EX,Rs_ID,Rt_ID, Branch_RES)
 	begin
 
 		if (MemRead_EX = '1') and ((Rt_EX = Rs_ID) or (Rt_EX = Rt_ID)) then

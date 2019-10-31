@@ -281,28 +281,35 @@ begin
    if Reset = '1' then
       PcOut_IF <= (others => '0');
 
-   elsif rising_edge(Clk) and PCWrite = '1' then
-      PcOut_IF <= PcIn;
+   elsif rising_edge(Clk) then
+      if PCWrite = '1' then
+         PcOut_IF <= PcIn;
+      end if;
    end if;
 end process;
 
 -- Cambio IF -> ID
-process(Clk, Reset, ID_Write)
+process(Clk, Reset)
 begin
-   if Reset = '1' or (rising_edge(Clk) and Nop_IF = '1') then
+   if Reset = '1' then
       IDataIn_ID <= (others => '0');
       PcOut_ID <= (others => '0');
 
-   elsif rising_edge(Clk) and ID_Write = '1' then
-      PcOut_ID <= PcOut_IF;
-      IDataIn_ID <= IDataIn_IF;
+   elsif rising_edge(Clk) then
+      if  Nop_IF = '1' then
+         IDataIn_ID <= (others => '0');
+         PcOut_ID <= (others => '0');
+      elsif ID_Write = '1' then
+         PcOut_ID <= PcOut_IF;
+         IDataIn_ID <= IDataIn_IF;
+      end if;
    end if;
 end process;
 
 -- Cambio ID -> EX
-process(Clk, Reset, Nop_ID)
+process(Clk, Reset)
 begin
-   if Reset = '1' or (rising_edge(Clk) and Nop_ID = '1') then
+   if Reset = '1' then
       Rd1_EX <= (others => '0');
       Rd2_EX <= (others => '0');
       IDataIn_EX <= (others => '0');
@@ -313,19 +320,39 @@ begin
       MemRead_EX <= '0';
       MemToReg_EX <= '0';
       RegWrite_EX <= '0';
+      ALUOp_EX <= "000";
+      RegDst_EX <= '0';
+
 
    elsif rising_edge(Clk) then
-      ALUSrc_EX <= ALUSrc_ID;
-      ALUOp_EX <= ALUOp_ID;
-      RegDst_EX <= RegDst_ID;
-      Branch_EX <= Branch_ID;
-      MemWrite_EX <= MemWrite_ID;
-      MemToReg_EX <= MemToReg_ID;
-      RegWrite_EX <= RegWrite_ID;
-      PcOut_EX <= PcOut_ID;
-      Rd1_EX <= Rd1_ID;
-      Rd2_EX <= Rd2_ID;
-      IDataIn_EX <= IDataIn_ID;
+      if Nop_ID = '1' then
+         Branch_EX <= '0';
+         ALUSrc_EX <= '0';
+         MemWrite_EX <= '0';
+         MemRead_EX <= '0';
+         MemToReg_EX <= '0';
+         RegWrite_EX <= '0';
+         ALUOp_EX <= "000";
+         RegDst_EX <= '0';
+
+         IDataIn_EX <= (others => '0');
+
+
+      else 
+
+         ALUSrc_EX <= ALUSrc_ID;
+         ALUOp_EX <= ALUOp_ID;
+         RegDst_EX <= RegDst_ID;
+         Branch_EX <= Branch_ID;
+         MemWrite_EX <= MemWrite_ID;
+         MemToReg_EX <= MemToReg_ID;
+         MemRead_EX <= MemRead_ID;
+         RegWrite_EX <= RegWrite_ID;
+         PcOut_EX <= PcOut_ID;
+         Rd1_EX <= Rd1_ID;
+         Rd2_EX <= Rd2_ID;
+         IDataIn_EX <= IDataIn_ID;
+      end if;
    end if;
 end process;
 
