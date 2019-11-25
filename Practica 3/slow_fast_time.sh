@@ -3,15 +3,15 @@
 #!/bin/bash
 
 # inicializar variables
-p=4
-Ninicio=$((10000+1024*$p))
-Npaso=64
-Nfinal=$((Ninicio+1024))
+#1000+1024*p
+Ninicio=1000
+Npaso=20
+#1000+1024*(p+1)
+Nfinal=2000
 fDAT=slow_fast_time.dat
 fPNG=slow_fast_time.png
+fDATN=slow_fast_N.dat
 rep=20
-mediaFast[0]=0
-mediaSlow[0]=0
 
 # borrar el fichero DAT y el fichero PNG
 rm -f $fDAT fPNG fDATN
@@ -21,12 +21,21 @@ touch $fDAT
 
 echo "Running slow and fast..."
 # bucle para N desde P hasta Q 
-for i in $(seq 1 1 $rep); do
+for N in $(seq $Ninicio $(($Npaso*2)) $Nfinal); do
 #for ((N = Ninicio ; N <= Nfinal ; N += Npaso)); do
 
-	echo "N: $i / $rep..."
+	echo "N: $N / $Nfinal..."
 
-	for N in $(seq $Ninicio $(($Npaso*2)) $Nfinal); do
+	rm -f $fDATN
+	touch $fDATN
+
+	mediaFast1=0
+	mediaFast2=0
+	mediaSlow1=0
+	mediaSlow2=0
+
+	for i in $(seq 1 1 $rep); do
+
 
 		# ejecutar los programas slow y fast consecutivamente con tamaño de matriz N
 		# para cada uno, filtrar la línea que contiene el tiempo y seleccionar la
@@ -34,35 +43,26 @@ for i in $(seq 1 1 $rep); do
 		# para poder imprimirlos en la misma línea del fichero de datos
 		N2=$(($N+$Npaso))
 
-		if [[ i -eq 1 ]]; then
-			mediaSlow[$N]=0
-			mediaFast[$N]=0
-			mediaSlow[$N2]=0
-			mediaFast[$N2]=0
-		fi
 
-		slowTime1=$(./slow $N | grep 'time' | awk '{print $3}')
-		mediaSlow[$N]=$(echo "scale=10; ${mediaSlow[$N]}+($slowTime1/$rep)" | bc)
 		slowTime2=$(./slow $N2 | grep 'time' | awk '{print $3}')
-		mediaSlow[$N2]=$(echo "scale=10; ${mediaSlow[$N2]}+($slowTime2/$rep)" | bc)
-		fastTime1=$(./fast $N | grep 'time' | awk '{print $3}')
-		mediaFast[$N]=$(echo "scale=10; ${mediaFast[$N]}+($fastTime1/$rep)" | bc)
-		fastTime2=$(./fast $N2 | grep 'time' | awk '{print $3}')
-		mediaFast[$N2]=$(echo "scale=10; ${mediaFast[$N2]}+($fastTime2/$rep)" | bc)
-
-		if [[ i -eq $rep ]]; then
-			echo "$N	${mediaSlow[$N]}	${mediaFast[$N]}" >> $fDAT
-			echo "$N2	${mediaSlow[$N2]}	${mediaFast[$N2]}" >> $fDAT
-		fi
+		mediaSlow2=$(echo "scale=10; $mediaSlow2+($slowTime2/$rep)" | bc)
+		#slowTime=$(./slow $N | grep 'time' | awk '{print $3}')
+		#mediaSlow1=$(echo "scale=10; $mediaSlow1+($slowTime/$rep)" | bc)
+		fastTime=$(./fast $N | grep 'time' | awk '{print $3}')
+		mediaFast1=$(echo "scale=10; $mediaFast1+($fastTime/$rep)" | bc)
+		#fastTime2=$(./fast $N2 | grep 'time' | awk '{print $3}')
+		#mediaFast2=$(echo "scale=10; $mediaFast2+($fastTime2/$rep)" | bc)
 
 	done
+
+	echo "$N	$mediaSlow2	$mediaFast1" >> $fDAT
+	#echo "$N2	$mediaSlow2	$mediaFast2" >> $fDAT
 
 done
 
 echo "Generating plot..."
 # llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
 # estándar el script que está entre "<< END_GNUPLOT" y "END_GNUPLOT"
-export PATH=$PATH:/share/apps/tools/gnuplot/bin
 gnuplot << END_GNUPLOT
 set title "Slow-Fast Execution Time"
 set ylabel "Execution time (s)"
