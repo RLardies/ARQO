@@ -33,7 +33,7 @@ if [ -f $fMult ]; then
 	rm $fMult
 fi
 
-touch $fCache $fTime $fMult
+touch $fcache $fTime $fMult
 
 for N in $(seq $Ninicio $Npaso $Nfinal); do
 

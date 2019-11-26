@@ -1,0 +1,8 @@
+Running slow and fast...
+(Valgrind) 1280 / 1536
+==11262== Cachegrind, a cache and branch-prediction profiler
+==11262== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==11262== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==11262== Command: ./slow 1280
+==11262== 
+--11262-- warning: L3 cache found, using its data for the LL simulation.
