@@ -14,11 +14,6 @@ fMult=./mult.dat
 fPNGC=./mult_cache.png
 fPNGT=./mult_time.png
 
-# Anadir valgrind al path
-export PATH=$PATH:/share/apps/tools/valgrind/bin
-# Indicar ruta librerías valgrind
-export VALGRIND_LIB=/share/apps/tools/valgrind/lib/valgrind
-
 echo "Running normal and traspuesta..."
 
 if [ -f $fCache ]; then
@@ -90,8 +85,6 @@ for i in $(seq 1 1 $rep); do
 	done
 
 done
-
-export PATH=$PATH:/share/apps/tools/gnuplot/bin
 
 echo "Generating plot..."
 # llamar a gnuplot para generar el gráfico y pasarle directamente por la entrada
