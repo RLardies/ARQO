@@ -14,38 +14,15 @@ fMult=./mult.dat
 fPNGC=./mult_cache.png
 fPNGT=./mult_time.png
 
-echo "Running normal and traspuesta..."
-
-if [ -f $fCache ]; then
-	rm $fCache
-fi
-
-if [ -f $fTime ]; then
-	rm $fTime
-fi
 
 if [ -f $fMult ]; then
-	rm $fMult
-fi
-
-touch $fCache $fTime $fMult
-
-sh ejercicio3_cache.sh &
-pidc=$!
-sh ejercicio3_tiempo.sh &
-pidt=$!
-
-wait $pidc
-wait $pidt
-
-if [ -f $fMult ]; then
-	rm $fMult
+ rm $fMult
 fi
 
 for (( i=1; i<=$((($Nfinal-$Ninicio)/$Npaso + 1)); i++ )); do
-	echo `head -$i $fTime | tail -1 | awk '{print $1"\t"$2}'`	\
-	`head -$i $fCache | tail -1 | awk '{print $2"\t"$3}'`	\
-	`head -$i $fTime | tail -1 | awk '{print $3}'`	`head -$i $fCache | tail -1 | awk '{print $4"\t"$5}'` >> $fMult
+ echo `head -$i $fTime | tail -1 | awk '{print $1"\t"$2}'` \
+ `head -$i $fCache | tail -1 | awk '{print $2"\t"$3}'` \
+ `head -$i $fTime | tail -1 | awk '{print $3}'` `head -$i $fCache | tail -1 | awk '{print $4"\t"$5}'` >> $fMult
 done
 
 echo "Generating plot..."
