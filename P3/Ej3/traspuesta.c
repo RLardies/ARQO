@@ -81,15 +81,11 @@ void traspose(tipo **matrix, int n)
 
 	for (i = 0; i < n; i++)
 	{
-		for (j = 0; j < n; j++)
-		{	
-			if (i != j)
-			{
-				matrix[i][j] += matrix[j][i];
-				matrix[j][i] = matrix[i][j] - matrix[j][i];
-				matrix[i][j] -= matrix[j][i];
-			}
-
+		for (j = 0; j < i; j++)
+		{
+			matrix[i][j] += matrix[j][i];
+			matrix[j][i] = matrix[i][j] - matrix[j][i];
+			matrix[i][j] -= matrix[j][i];
 		}
 	}
 }

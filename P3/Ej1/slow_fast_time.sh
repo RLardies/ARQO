@@ -41,13 +41,13 @@ for i in $(seq 1 1 $rep); do
 			mediaFast[$N2]=0
 		fi
 
-		slowTime1=$(./slow $N | grep 'time' | awk '{print $3}')
+		slowTime1=$(../slow $N | grep 'time' | awk '{print $3}')
 		mediaSlow[$N]=$(echo "scale=10; ${mediaSlow[$N]}+($slowTime1/$rep)" | bc)
-		slowTime2=$(./slow $N2 | grep 'time' | awk '{print $3}')
+		slowTime2=$(../slow $N2 | grep 'time' | awk '{print $3}')
 		mediaSlow[$N2]=$(echo "scale=10; ${mediaSlow[$N2]}+($slowTime2/$rep)" | bc)
-		fastTime1=$(./fast $N | grep 'time' | awk '{print $3}')
+		fastTime1=$(../fast $N | grep 'time' | awk '{print $3}')
 		mediaFast[$N]=$(echo "scale=10; ${mediaFast[$N]}+($fastTime1/$rep)" | bc)
-		fastTime2=$(./fast $N2 | grep 'time' | awk '{print $3}')
+		fastTime2=$(../fast $N2 | grep 'time' | awk '{print $3}')
 		mediaFast[$N2]=$(echo "scale=10; ${mediaFast[$N2]}+($fastTime2/$rep)" | bc)
 
 		if [[ i -eq $rep ]]; then

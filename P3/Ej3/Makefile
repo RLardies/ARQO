@@ -4,13 +4,13 @@ FLAGS = -g -Wall -D_GNU_SOURCE
 
 .PHONY: clean all
 
-all: fast slow
+all: traspuesta normal
 
-fast: fast.c ../arqo3.c
+traspuesta: traspuesta.c ../arqo3.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
-slow: slow.c ../arqo3.c
+normal: normal.c ../arqo3.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
 
 clean:
-	rm -f *.o *~ fast slow
+	rm -f *.o *~ traspuesta normal
