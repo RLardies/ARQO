@@ -5,15 +5,18 @@
 #include <stdlib.h>
 #include "arqo4.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
 	float *A=NULL, *B=NULL;
 	long long k=0;
 	struct timeval fin,ini;
 	float sum=0;
+	unsigned long long tam;
+
+	tam = atoi(argv[1]);
 	
-	A = generateVector(M);
-	B = generateVector(M);
+	A = generateVector(tam);
+	B = generateVector(tam);
 	if ( !A || !B )
 	{
 		printf("Error when allocationg matrix\n");
@@ -26,7 +29,7 @@ int main(void)
 	/* Bloque de computo */
 	sum = 0;
 	#pragma omp parallel for reduction(+:sum)
-	for(k=0;k<M;k++)
+	for(k=0;k<tam;k++)
 	{
 		sum = sum + A[k]*B[k];
 	}

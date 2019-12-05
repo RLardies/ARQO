@@ -7,17 +7,17 @@
 
 #include "arqo4.h"
 
-float ** generateMatrix(int size)
+float ** generateMatrix(unsigned long long size)
 {
 	float *array=NULL;
 	float **matrix=NULL;
-	int i=0,j=0;
+	unsigned long long i=0,j=0;
 
 	matrix=(float **)malloc(sizeof(float *)*size);
 	array=(float *)malloc(sizeof(float)*size*size);
 	if( !array || !matrix)
 	{
-		printf("Error when allocating matrix of size %d.\n",size);
+		printf("Error when allocating matrix of size %llu.\n",size);
 		if( array )
 			free(array);
 		if( matrix )
@@ -38,17 +38,17 @@ float ** generateMatrix(int size)
 	return matrix;
 }
 
-float ** generateEmptyMatrix(int size)
+float ** generateEmptyMatrix(unsigned long long size)
 {
 	float *array=NULL;
 	float **matrix=NULL;
-	int i=0;
+	unsigned long long i=0;
 
 	matrix=(float **)malloc(sizeof(float *)*size);
 	array=(float *)malloc(sizeof(float)*size*size);
 	if( !array || !matrix)
 	{
-		printf("Error when allocating matrix of size %d.\n",size);
+		printf("Error when allocating matrix of size %llu.\n",size);
 		if( array )
 			free(array);
 		if( matrix )
@@ -74,15 +74,15 @@ void freeMatrix(float **matrix)
 	return;
 }
 
-float * generateVector(int size)
+float * generateVector(unsigned long long size)
 {
 	float *array=NULL;
-	int i=0;
+	unsigned long long i=0;
 
 	array=(float *)malloc(sizeof(float)*size);
 	if( !array )
 	{
-		printf("Error when allocating vector of size %d.\n",size);
+		printf("Error when allocating vector of size %llu.\n",size);
 		if( array )
 			free(array);
 		return NULL;
@@ -96,14 +96,14 @@ float * generateVector(int size)
 	return array;
 }
 
-float * generateEmptyVector(int size)
+float * generateEmptyVector(unsigned long long size)
 {
 	float *array=NULL;
 
 	array=(float *)malloc(sizeof(float)*size);
 	if( !array )
 	{
-		printf("Error when allocating vector of size %d.\n",size);
+		printf("Error when allocating vector of size %llu.\n",size);
 		if( array )
 			free(array);
 		return NULL;
@@ -117,14 +117,14 @@ void freeVector(void *array)
 		free(array);
 }
 
-int * generateEmptyIntVector(int size)
+int * generateEmptyIntVector(unsigned long long size)
 {
 	int *array=NULL;
 
 	array=(int *)malloc(sizeof(int)*size);
 	if( !array )
 	{
-		printf("Error when allocating vector of size %d.\n",size);
+		printf("Error when allocating vector of size %llu.\n",size);
 		if( array )
 			free(array);
 		return NULL;
