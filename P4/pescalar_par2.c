@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	float *A=NULL, *B=NULL;
 	long long k=0;
 	struct timeval fin,ini;
-	float sum=0;
+	double sum=0;
 	unsigned long long tam;
 
 	tam = atoi(argv[1]);
