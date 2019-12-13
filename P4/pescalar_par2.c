@@ -12,8 +12,10 @@ int main(int argc, char **argv)
 	struct timeval fin,ini;
 	double sum=0;
 	unsigned long long tam;
+	int cores;
 
 	tam = atoi(argv[1]);
+	cores = atoi(argv[2]);
 	
 	A = generateVector(tam);
 	B = generateVector(tam);
@@ -28,7 +30,7 @@ int main(int argc, char **argv)
 	gettimeofday(&ini,NULL);
 	/* Bloque de computo */
 	sum = 0;
-	#pragma omp parallel for reduction(+:sum)
+	#pragma omp parallel for reduction(+:sum) num_threads(cores)
 	for(k=0;k<tam;k++)
 	{
 		sum = sum + A[k]*B[k];

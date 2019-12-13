@@ -15,11 +15,7 @@ int main(int argc, char **argv)
 	unsigned long long tam;
 
 	tam = atoll(argv[1]);
-<<<<<<< HEAD
-	
-=======
 	printf("%llu\n", tam);	
->>>>>>> 8e10b7a0c6379c08487301ac3ca53786ec06afce
 	A = generateVector(tam);
 	B = generateVector(tam);
 	if ( !A || !B )

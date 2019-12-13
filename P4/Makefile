@@ -20,7 +20,6 @@ pescalar_par1: pescalar_par1.c arqo4.c
 
 pescalar_par2: pescalar_par2.c arqo4.c
 	gcc $(FLAGS) $(LIB_DIR) -o $@ $^ $(LIBS)
-
 clean:
 	rm -f *.o *~ omp1 omp2 pescalar_serie pescalar_par1 pescalar_par2
 	
