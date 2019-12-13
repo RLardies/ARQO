@@ -11,11 +11,11 @@ int main(int argc, char **argv)
 	float *A=NULL, *B=NULL;
 	unsigned long long k=0;
 	struct timeval fin,ini;
-	float sum=0;
+	double sum=0;
 	unsigned long long tam;
 
-	tam = atoi(argv[1]);
-	
+	tam = atoll(argv[1]);
+	printf("%llu\n", tam);	
 	A = generateVector(tam);
 	B = generateVector(tam);
 	if ( !A || !B )
