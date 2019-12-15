@@ -2,7 +2,7 @@
 
 tamIni=40000000
 tamFinal=930000000
-paso=4000000
+paso=44500000
 rep=5
 fDat=time_core_
 fSerie=serie.dat
@@ -32,19 +32,22 @@ for (( j=1; j<=c; j++ )); do
 	if [[ -e  $fDat$j.dat ]]; then
 		rm $fDat$j.dat
 	fi
+	cont=1
 	for (( i=1; i<=rep; i++ )); do
 		echo "$j : $i / $rep"
 		for (( k=tamIni; k<=tamFinal; k+=paso )); do
 			if [[ i -eq 1 ]]; then
 				mediaParal[$k]=0
 			fi
+			echo "   $k / $tamFinal"
 			timeParal=$(../pescalar_par2 $k $j | tail -1 | awk '{print $2}')
 			mediaParal[$k]=$(echo "scale=10; ${mediaParal[$k]}+($timeParal/$rep)" | bc)
 
 			if [[ i -eq rep ]]; then
-				aux=$(cat $fSerie | grep $k | awk '{print $2}')
+				aux=$(head -$cont $fSerie | tail -1 | awk '{print $2}')
 				aceleracion=$(echo "scale=10; $aux/${mediaParal[$k]}" | bc)
 				echo "$k	${mediaParal[$k]}	$aceleracion" >> $fDat$j.dat
+				cont=$(($cont+1))
 			fi
 		done
 	done
