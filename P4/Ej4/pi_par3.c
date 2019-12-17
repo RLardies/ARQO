@@ -23,14 +23,26 @@ int main( int argc, char *argv[] )
 	printf("Numero de cores del equipo: %d\n", numProcs);
 	omp_set_num_threads( numProcs );
 
-	datasz = sizeof(double);
-	printf("Double size: %d bytes\n", datasz);
-	f = popen("getconf -a | grep CACHE | grep \"3_CACHE_LINESIZE\" | awk '{print $2}'", "r");
-	fgets(buf, sizeof(buf), f);
-	pclose(f);
-	linesz = atoi(buf);
-	padsz = linesz / datasz;
-	printf("Cache line size: %d bytes => padding: %d elementos\n", linesz, padsz);
+	if (argc == 1) {
+		datasz = sizeof(double);
+		printf("Double size: %d bytes\n", datasz);
+		f = popen("getconf -a | grep CACHE | grep \"3_CACHE_LINESIZE\" | awk '{print $2}'", "r");
+		fgets(buf, sizeof(buf), f);
+		pclose(f);
+		linesz = atoi(buf);
+		padsz = linesz / datasz;
+		printf("Cache line size: %d bytes => padding: %d elementos\n", linesz, padsz);
+	}
+	else {
+		datasz = sizeof(double);
+		printf("Double size: %d bytes\n", datasz);
+		f = popen("getconf -a | grep CACHE | grep \"3_CACHE_LINESIZE\" | awk '{print $2}'", "r");
+		fgets(buf, sizeof(buf), f);
+		pclose(f);
+		linesz = atoi(buf);
+		padsz = atoi(argv[1]);
+		printf("Cache line size: %d bytes => padding: %d elementos\n", linesz, padsz);
+	}
 	
 	// Solicitamos memoria para la suma de cada proceso
 	sum = (double*) malloc (sizeof(double)*numProcs*padsz);	

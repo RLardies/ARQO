@@ -1,0 +1,9 @@
+Pregunta 4.1: Se utilizan n=100000000 rectángulos, que a su vez se dividen en dos para calcular la imagen del punto medio del rectángulo, pero se calcula la suma de las áreas de esos 100000000.
+
+Pregunta 4.2: Que la v4 utiliza una variable privada para ir guardando los resultados de las sumas y luego guarda el resultado final en su parte del array sum, mientras que la v1, aunque solo a su parte del array, accede a la misma variable sum desde todos los hilos en cada iterración.
+
+Ejercicio 4.3: En el resultado no se obtiene ninguna diferencia, sin embargo, el rendimiento de la v4 es mejor que el de la v1 en aproximadamente un 70%. Esto se debe a que al guardar la variable sum en la cache, varias posiciones del array se guardan en el mismo bloque, entonces, como la variable sum es compartida en la v1, si varios hilos acceden a la vez a partes de larray que están en el mismo bloque de la caché, habrá un retardo por concurrencia ya que solo una puede acceder a los datos a la vez para evitar inconsistencia en los datos, lo que retarda la ejecución del programa.
+
+Ejercicio 4.4: El resultado en ambos es el mismo he igual al resto. En cuanto al rendimiento de la v2, es muy similar al de la v1, ya que aunque comparta la variable sum donde se guarda la direccíón de memoria del array, este sigue siendo compartido y no soluciona el problema de la v1. La v4 sin embargo, al ver el tamaño de cada bloque de la caché, y asignar un bloque a cada hilo, aunque consuma más memoria, consigue solucionar el problema de concurrencia y conseguir un rendimiento similar al de la v4.
+
+Ejercicio 4.5: 
