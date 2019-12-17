@@ -1,7 +1,7 @@
 #! /bin/bash
 P=3
-tamIni=$((512*$P))
-tamFinal=$((2048+512*$P))
+tamIni=$((512+$P))
+tamFinal=$((2048+512+$P))
 paso=64
 rep=5
 fDat=tiempos.dat
@@ -11,7 +11,7 @@ fPNG2=aceleracion.png
 for(( j=1; j<=rep; j++));do
 	echo "$j / $rep"
 	for (( i=tamIni; i<=tamFinal; i+=paso )); do
-
+		echo "	$i / $tamFinal"
 		if [[ j -eq 1 ]]; then
 			mediaSerie[$i]=0
 			mediaParal[$i]=0

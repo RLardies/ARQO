@@ -18,7 +18,7 @@ for (( i=1; i<=3; i++ )); do
 	done
 	echo "${tiempoPar[1]}	${tiempoPar[2]}	${tiempoPar[3]}	${tiempoPar[4]}" >> $fDat$1.dat
 	
-	tserie=$(echo $serie | cut -f1)
+	tserie=$(echo $serie | awk '{print $1}')
 	for (( j=1; j<=4; j++ )); do
 		acc[$j]=$(echo "scale=10; $tserie/${tiempoPar[$j]}" | bc)
 	done
