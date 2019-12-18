@@ -10,8 +10,8 @@
 
 int main( int argc, char *argv[] ) 
 {
-	int i, n=100000000, numProcs;
-	double x, h, pi, sum = 0.0, t = 0;
+	int n=100000000, numProcs;
+	double x, h, pi = 0.0, sum = 0.0, t = 0;
 	struct timeval t1,t2;
 	
 	numProcs = omp_get_num_procs();
@@ -23,7 +23,7 @@ int main( int argc, char *argv[] )
 	
 	#pragma omp parallel private(x, sum) default(shared)
 	{
-		int tid, numThreads;
+		int tid, numThreads, i;
 
 		// Obtenemos el numero de procesos lanzados	
                 numThreads = omp_get_num_threads();
