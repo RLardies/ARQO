@@ -20,7 +20,7 @@ for (( j=1; j<=rep; j++ )); do
 			mediaSerie[$i]=0
 		fi
 		echo "   $i / $tamFinal"
-		timeSerie=$(../pescalar_serie $i | tail -1 | awk '{print $2}')
+		timeSerie=$(./pescalar_serie $i | tail -1 | awk '{print $2}')
 		mediaSerie[$i]=$(echo "scale=10; ${mediaSerie[$i]}+($timeSerie/$rep)" | bc)
 		if [[ j -eq rep ]]; then
 			echo "$i	${mediaSerie[$i]}" >> $fSerie
@@ -40,7 +40,7 @@ for (( j=1; j<=c; j++ )); do
 				mediaParal[$k]=0
 			fi
 			echo "   $k / $tamFinal"
-			timeParal=$(../pescalar_par2 $k $j | tail -1 | awk '{print $2}')
+			timeParal=$(./pescalar_par2 $k $j | tail -1 | awk '{print $2}')
 			mediaParal[$k]=$(echo "scale=10; ${mediaParal[$k]}+($timeParal/$rep)" | bc)
 
 			if [[ i -eq rep ]]; then

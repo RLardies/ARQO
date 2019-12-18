@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#include "../arqo3.h"
+#include "arqo3.h"
 
 void compute(tipo **m1, tipo **m2, tipo **mres, int n, int cores);
 void traspose(tipo **matrix, int n);
@@ -47,8 +47,11 @@ int main( int argc, char *argv[])
 	gettimeofday(&ini,NULL);
 
 	/* Main computation */
+	printMatrix(m1, n);
+	printMatrix(m2, n);
 	traspose(m2, n);
 	compute(m1, m2, mres, n, cores);
+	printMatrix(mres, n);
 	/* End of computation */
 
 	gettimeofday(&fin,NULL);

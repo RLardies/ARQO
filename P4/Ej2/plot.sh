@@ -14,12 +14,12 @@ gnuplot << END_GNUPLOT
 set title "Tiempos de ejecución"
 set ylabel "Tiempo (s)"
 set xlabel "Tamaño de vector"
-set key right bottom
+set key left top
 set grid
 set term png
 set output "$fPNG"
 plot for [i=1:$c] "$fDat".i.".dat" using 1:2 with lines lw 2 title "".i." hilos", \
-"$fSerie" using 1:2 with lines lw 2 title "serie"
+"$fSerie" using 1:2 with lines lw 2 lt rgb "#ff009b" title "serie"
 replot
 set title "Aceleración"
 set ylabel "Aceleración"

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#include "../arqo3.h"
+#include "arqo3.h"
 
 void compute(tipo **m1, tipo **m2, tipo **mres, int n, int cores);
 void traspose(tipo **matrix, int n);
@@ -26,15 +26,16 @@ int main( int argc, char *argv[])
 	n = atoi(argv[1]);
 	cores = atoi(argv[2]);
 
+
 	m1 = generateMatrix(n);
 	if(m1 == NULL) return -1;
-
 	m2 = generateMatrix(n);
 	if(m2 == NULL) 
 	{	
 		freeMatrix(m1);
 		return -1;
 	}
+
 
 	mres = generateEmptyMatrix(n);
 	if (mres == NULL)
@@ -52,6 +53,7 @@ int main( int argc, char *argv[])
 	/* End of computation */
 
 	gettimeofday(&fin,NULL);
+
 	printf("Execution time: %f\n", 
 		((fin.tv_sec*1000000+fin.tv_usec)-(ini.tv_sec*1000000+ini.tv_usec))*1.0/1000000.0);	
 
@@ -65,19 +67,15 @@ int main( int argc, char *argv[])
 void compute(tipo **m1, tipo **m2, tipo **mres, int n, int cores)
 {
 	int i, j, z;
-	tipo suma;
-	
-	
+	#pragma omp parallel for num_threads(cores) private(i,j,z)
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
 		{	
-			suma = 0;
+			mres[i][j] = 0;
 
-			#pragma omp parallel for reduction(+:suma) num_threads(cores)
 			for (z = 0; z < n; z++)
-				suma += m1[i][z] * m2[j][z];
-			mres[i][j] = suma;
+				mres[i][j] += m1[i][z] * m2[j][z];
 		}
 	}
 }
